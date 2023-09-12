@@ -1,12 +1,9 @@
-function StartScreen({ questionLength, dispatch }) {
-  function handleStatus() {
-    dispatch({ type: "start" });
-  }
+function StartScreen({ numQuestions, dispatch }) {
   return (
-    <div className="">
+    <div>
       <h2>Welcome to The React Quiz!</h2>
-      <p>{questionLength} questions to test your React mastery</p>
-      <button className="btn btn-ui" onClick={handleStatus}>
+      <h3>{numQuestions} questions to test your React mastery</h3>
+      <button onClick={() => dispatch({ type: "start" })} className="btn">
         Let's start
       </button>
     </div>
