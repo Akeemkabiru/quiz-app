@@ -9,6 +9,8 @@ import StartScreen from "./StartScreen";
 import NextButton from "./NextButton";
 import Progress from "./Progress";
 import FinishedQuiz from "./FinishedQuiz";
+import Footer from "./Footer";
+import Timer from "./Timer";
 export default function App() {
   function reducer(state, action) {
     switch (action.type) {
@@ -33,7 +35,13 @@ export default function App() {
       case "finished":
         return { ...state, status: "finished" };
       case "restart":
-        return { ...state, status: "ready", index: 0, point: 0, answer: null };
+        return { ...initialState, status: "ready", questions: state.questions };
+      case "tick":
+        return {
+          ...state,
+          secondsRemaining: state.secondsRemaining - 1,
+          status: state.secondsRemaining === 0 ? "finished" : state.status,
+        };
       default:
         break;
     }
@@ -45,9 +53,10 @@ export default function App() {
     answer: null,
     index: 0,
     point: 0,
+    secondsRemaining: 300,
   };
   const [state, dispatch] = useReducer(reducer, initialState);
-  const { questions, status, index, answer, point } = state;
+  const { questions, status, index, answer, point, secondsRemaining } = state;
   const numQuestions = questions.length;
   const maxPossiblePoint = questions.reduce(
     (prev, cur) => prev + cur.points,
@@ -93,6 +102,9 @@ export default function App() {
               numQuestion={numQuestions}
               index={index}
             />
+            <Footer>
+              <Timer secondsRemaining={secondsRemaining} dispatch={dispatch} />
+            </Footer>
           </>
         )}
         {status === "finished" && (
