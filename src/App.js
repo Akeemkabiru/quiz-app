@@ -25,13 +25,15 @@ export default function App() {
           answer: action.payload,
           point:
             action.payload === question.correctOption
-              ? state.point + 1
+              ? state.point + question.points
               : state.point,
         };
       case "nextQuestion":
         return { ...state, index: state.index + 1, answer: null };
       case "finished":
-        return { ...state };
+        return { ...state, status: "finished" };
+      case "restart":
+        return { ...state, status: "ready", index: 0, point: 0, answer: null };
       default:
         break;
     }
@@ -48,15 +50,14 @@ export default function App() {
   const { questions, status, index, answer, point } = state;
   const numQuestions = questions.length;
   const maxPossiblePoint = questions.reduce(
-    (acc, curr) => acc.points + curr.points
+    (prev, cur) => prev + cur.points,
+    0
   );
-  // const maxPossiblePoint = 15;
   useEffect(() => {
     async function fetchQuestion() {
       try {
         const res = await fetch(`http://localhost:8000/questions`);
         const data = await res.json();
-        console.log(data);
         dispatch({ type: "dataReceived", payload: data });
       } catch (error) {
         dispatch({ type: "dataFailed" });
@@ -76,9 +77,9 @@ export default function App() {
         {status === "active" && (
           <>
             <Progress
-              numQuestion={numQuestions}
               index={index}
-              point={point}
+              numQuestions={numQuestions}
+              points={point}
               maxPossiblePoint={maxPossiblePoint}
             />
             <Question
@@ -94,7 +95,14 @@ export default function App() {
             />
           </>
         )}
-        {status === "finished" && <FinishedQuiz points={point} />}
+        {status === "finished" && (
+          <FinishedQuiz
+            points={point}
+            maxPossiblePoint={maxPossiblePoint}
+            dispatch={dispatch}
+          />
+        )}
+        {}
       </Main>
     </div>
   );
